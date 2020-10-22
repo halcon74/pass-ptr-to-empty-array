@@ -37,7 +37,7 @@ read_forbidden_volumes (const char **array,
           strcat (strcpy (concat, array[loop_i_volume]), " changed");
           array[loop_i_volume] = strdup (concat);
         }
-      syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, length = %u, array [%u] = %s", __FILE__, __LINE__, *length, 6, array[6]);
+      syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, length = %u, array[%u] = %s", __FILE__, __LINE__, *length, 6, array[6]);
       return 0;
     }
   else
