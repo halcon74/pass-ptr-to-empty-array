@@ -13,10 +13,10 @@ read_forbidden_mounts (char **array,
   
   for (unsigned int loop_i_mount = 0; loop_i_mount < sizeof (user_forbidden_mounts) / sizeof (user_forbidden_mounts[0]); loop_i_mount++)
     {
-          capacity = loop_i_mount+1;
-          array = (char **) realloc (array, capacity * sizeof(char *));
-          array[loop_i_mount] = malloc (capacity * sizeof(char));
-          strcpy (array[loop_i_mount], user_forbidden_mounts[loop_i_mount]);
+      capacity = loop_i_mount+1;
+      array = (char **) realloc (array, capacity * sizeof(char *));
+      array[loop_i_mount] = malloc (capacity * sizeof(char));
+      strcpy (array[loop_i_mount], user_forbidden_mounts[loop_i_mount]);
     }
     
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully assigned all the values, length = %u, array[%u] = %s", __FILE__, __LINE__, *length, 6, array[6]);
