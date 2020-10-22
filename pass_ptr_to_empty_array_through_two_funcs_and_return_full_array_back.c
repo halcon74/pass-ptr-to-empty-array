@@ -13,7 +13,7 @@ read_forbidden_mounts (const char **const array,
   for (unsigned int loop_i_mount = 0; loop_i_mount < sizeof (user_forbidden_mounts) / sizeof (user_forbidden_mounts[0]); loop_i_mount++)
     {
       capacity = loop_i_mount + 1;
-      array[loop_i_mount] = strdup(user_forbidden_mounts[loop_i_mount]);
+      array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount]);
       *length = capacity;
     }
     
