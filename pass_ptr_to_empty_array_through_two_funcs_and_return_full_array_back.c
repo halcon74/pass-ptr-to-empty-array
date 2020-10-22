@@ -4,19 +4,17 @@
 #include <syslog.h>
 
 static int
-read_forbidden_mounts (char **array, 
-                         unsigned int *length) 
+read_forbidden_mounts (const char **const array, 
+                         unsigned int *const length) 
 {
-  char *user_forbidden_mounts[] = { "/mnt/cdrom", "/mnt/cdaudio", "/tmp", "/var", "/dev/shm", "/mnt/sambadir1", "/mnt/sambadir2" };
+  static const char *const user_forbidden_mounts[] = { "/mnt/cdrom", "/mnt/cdaudio", "/tmp", "/var", "/dev/shm", "/mnt/sambadir1", "/mnt/sambadir2" };
   unsigned int capacity;
-  length = &capacity;
   
   for (unsigned int loop_i_mount = 0; loop_i_mount < sizeof (user_forbidden_mounts) / sizeof (user_forbidden_mounts[0]); loop_i_mount++)
     {
-      capacity = loop_i_mount+1;
-      array = (char **) realloc (array, capacity * sizeof(char *));
-      array[loop_i_mount] = malloc (capacity * sizeof(char));
-      strcpy (array[loop_i_mount], user_forbidden_mounts[loop_i_mount]);
+      capacity = loop_i_mount + 1;
+      array[loop_i_mount] = strdup(user_forbidden_mounts[loop_i_mount]);
+      *length = capacity;
     }
     
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully assigned all the values, length = %u, array[%u] = %s", __FILE__, __LINE__, *length, 6, array[6]);
@@ -25,10 +23,10 @@ read_forbidden_mounts (char **array,
 }
 
 static int
-read_forbidden_volumes (char **array, 
+read_forbidden_volumes (const char **array, 
                          unsigned int *length) 
 {
-  char *concat;
+  char concat[255];
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
   if (read_forbidden_mounts (array, length) == 0) 
@@ -37,7 +35,7 @@ read_forbidden_volumes (char **array,
       for (unsigned int loop_i_volume = 0; loop_i_volume < *length; loop_i_volume++)
         {
           strcat (strcpy (concat, array[loop_i_volume]), " changed");
-          *(array)[loop_i_volume] = *concat;
+          array[loop_i_volume] = strdup (concat);
         }
       syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, length = %u, array [%u] = %s", __FILE__, __LINE__, *length, 6, array[6]);
       return 0;
@@ -52,7 +50,7 @@ read_forbidden_volumes (char **array,
 static void
 update_volumes (void)
 {
-  char **ptr_user_forbidden_volumes = malloc (1 * sizeof(char*));
+  const char **ptr_user_forbidden_volumes = malloc (1 * sizeof(const char*));
   unsigned int user_forbidden_volumes_length = 0;	
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   
@@ -72,7 +70,7 @@ update_volumes (void)
 static void
 update_mounts (void)
 {
-  char **ptr_user_forbidden_mounts = malloc (1 * sizeof(char*));
+  const char **ptr_user_forbidden_mounts = malloc (1 * sizeof(const char*));
   unsigned int user_forbidden_mounts_length = 0;	
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
 
