@@ -9,7 +9,6 @@ read_forbidden_mounts (char **array,
 {
   char *user_forbidden_mounts[] = { "/mnt/cdrom", "/mnt/cdaudio", "/tmp", "/var", "/dev/shm", "/mnt/sambadir1", "/mnt/sambadir2" };
   unsigned int user_forbidden_mounts_length = sizeof (user_forbidden_mounts) / sizeof (user_forbidden_mounts[0]);
-  unsigned int capacity_incr;
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts started", __FILE__, __LINE__);
   
   if (user_forbidden_mounts_length > *ptr_length)
