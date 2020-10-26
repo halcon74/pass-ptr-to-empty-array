@@ -17,11 +17,8 @@ read_forbidden_mounts (char **array,
       return 1;
     }
   
-  for (unsigned int loop_i_mount = 0; loop_i_mount < *ptr_length; loop_i_mount++)
-  {
-    if (loop_i_mount <= (user_forbidden_mounts_length-1))
-      array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount]);
-  }
+  for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; loop_i_mount++)
+    array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount]);
   *ptr_length = user_forbidden_mounts_length;
 
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully assigned all the values, length = %u, array[%u] = %s", __FILE__, __LINE__, *ptr_length, 6, array[6]);
