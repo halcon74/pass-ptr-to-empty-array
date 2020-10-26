@@ -74,6 +74,7 @@ update_volumes (void)
   else
     {
       syslog (LOG_EMERG, "%s[%u]: update_volumes failed to read forbidden volumes", __FILE__, __LINE__);
+      return 1;
     }
   
   printf ("update_volumes ended\n");
@@ -97,6 +98,7 @@ update_mounts (void)
   else
     {
       syslog (LOG_EMERG, "%s[%u]: update_mounts failed to read forbidden mounts", __FILE__, __LINE__);
+      return 1;
     }
   
   printf ("update_mounts ended\n");
