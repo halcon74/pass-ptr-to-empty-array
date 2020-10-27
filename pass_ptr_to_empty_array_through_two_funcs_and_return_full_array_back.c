@@ -57,15 +57,9 @@ update_volumes (void)
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   
   if (read_forbidden_volumes (user_forbidden_volumes, ptr_user_forbidden_volumes_length) == 0)
-    {
-      for (unsigned int loop_i_volume = 0; loop_i_volume < user_forbidden_volumes_length; 
-              loop_i_volume++)
-        free (user_forbidden_volumes[loop_i_volume]);
-    }
-  else
-    {
-      return;
-    }
+    for (unsigned int loop_i_volume = 0; loop_i_volume < user_forbidden_volumes_length; 
+            loop_i_volume++)
+      free (user_forbidden_volumes[loop_i_volume]);
 }
 
 static void
@@ -76,15 +70,9 @@ update_mounts (void)
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   
   if (read_forbidden_mounts (user_forbidden_mounts, ptr_user_forbidden_mounts_length) == 0)
-    {
-      for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; 
-              loop_i_mount++)
-        free (user_forbidden_mounts[loop_i_mount]);
-    }
-  else
-    {
-      return;
-    }
+    for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; 
+            loop_i_mount++)
+    free (user_forbidden_mounts[loop_i_mount]);
 }
 
 int
