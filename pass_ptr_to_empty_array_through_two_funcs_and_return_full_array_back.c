@@ -65,7 +65,7 @@ read_forbidden_volumes (char **array,
     }
 }
 
-static int
+static void
 update_volumes (void)
 {
   unsigned int user_forbidden_volumes_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
@@ -85,14 +85,13 @@ update_volumes (void)
     {
       syslog (LOG_EMERG, "%s[%u]: update_volumes failed to read forbidden volumes", 
               __FILE__, __LINE__);
-      return 1;
+      return;
     }
   
   printf ("update_volumes ended\n");
-  return 0;
 }
 
-static int
+static void
 update_mounts (void)
 {
   unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
@@ -112,11 +111,10 @@ update_mounts (void)
     {
       syslog (LOG_EMERG, "%s[%u]: update_mounts failed to read forbidden mounts", 
               __FILE__, __LINE__);
-      return 1;
+      return;
     }
   
   printf ("update_mounts ended\n");
-  return 0;
 }
 
 int
