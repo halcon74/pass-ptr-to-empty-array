@@ -59,7 +59,7 @@ read_forbidden_volumes (char **array,
     }
   else
     {
-      syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to read forbidden mounts", \
+      syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to read forbidden mounts", 
               __FILE__, __LINE__);
       return 1;
     }
@@ -83,7 +83,7 @@ update_volumes (void)
     }
   else
     {
-      syslog (LOG_EMERG, "%s[%u]: update_volumes failed to read forbidden volumes", \
+      syslog (LOG_EMERG, "%s[%u]: update_volumes failed to read forbidden volumes", 
               __FILE__, __LINE__);
       return 1;
     }
@@ -102,7 +102,7 @@ update_mounts (void)
   
   if (read_forbidden_mounts (user_forbidden_mounts, ptr_user_forbidden_mounts_length) == 0)
     {
-      syslog (LOG_EMERG, "%s[%u]: update_mounts successfully read %u forbidden mounts", \
+      syslog (LOG_EMERG, "%s[%u]: update_mounts successfully read %u forbidden mounts", 
               __FILE__, __LINE__, user_forbidden_mounts_length);
       for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; 
               loop_i_mount++)
@@ -110,7 +110,7 @@ update_mounts (void)
     }
   else
     {
-      syslog (LOG_EMERG, "%s[%u]: update_mounts failed to read forbidden mounts", \
+      syslog (LOG_EMERG, "%s[%u]: update_mounts failed to read forbidden mounts", 
               __FILE__, __LINE__);
       return 1;
     }
