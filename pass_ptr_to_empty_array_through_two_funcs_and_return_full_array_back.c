@@ -3,6 +3,8 @@
 #include <string.h>
 #include <syslog.h>
 
+#define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
+
 static int
 read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
@@ -56,7 +58,7 @@ read_forbidden_volumes (char **array,
 static int
 update_volumes (void)
 {
-  unsigned int user_forbidden_volumes_length = 100;
+  unsigned int user_forbidden_volumes_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
   char *ptr_user_forbidden_volumes[user_forbidden_volumes_length];
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   printf ("update_volumes started\n");
@@ -80,7 +82,7 @@ update_volumes (void)
 static int
 update_mounts (void)
 {
-  unsigned int user_forbidden_mounts_length = 100;
+  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
   char *ptr_user_forbidden_mounts[user_forbidden_mounts_length];
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   printf ("update_mounts started\n");
