@@ -7,7 +7,8 @@
 #define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
 
 static int
-read_fstab (void)
+read_fstab (char **array,
+                         unsigned int *ptr_length)
 {
   char *read_file;
   FILE *file;
@@ -15,10 +16,11 @@ read_fstab (void)
   char buf[1024];
   struct mntent *mntent;
   char *mount_path;
-  char *mount_opts;
+  unsigned int loop_i_mount = 0;
 
 #ifndef HAVE_GETMNTENT_R
   
+  *ptr_length = 0;
   // in glib: read_file = get_fstab_file ();
   read_file = "/etc/fstab";
   
@@ -35,13 +37,22 @@ read_fstab (void)
           if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
             {
               mount_path = mntent->mnt_dir;
-              syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", __FILE__, __LINE__, mount_path);
+              if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
+                {
+                  syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
+                          __FILE__, __LINE__);
+                  return 1;
+                }
+              syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
+	              __FILE__, __LINE__, mount_path);
+              loop_i_mount++;
             }
         }
       
       endmntent (file);
-
-      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully read %s", __FILE__, __LINE__, read_file);
+      *ptr_length = sizeof (array) / sizeof (array[0]);
+      
+      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", __FILE__, __LINE__, *ptr_length, read_file);
       return 0;
     }
 
@@ -55,17 +66,18 @@ static int
 read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
 {
-  if (read_fstab () != 0)
-  {
-    syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't continue", __FILE__, __LINE__);
-    return 1;
-  }
-  
-  char *user_forbidden_mounts[] = { "/mnt/cdrom", "/mnt/cdaudio", "/tmp", "/var", 
-          "/dev/shm", "/mnt/sambadir1", "/mnt/sambadir2" };
-  unsigned int user_forbidden_mounts_length = sizeof (user_forbidden_mounts) 
-          / sizeof (user_forbidden_mounts[0]);
+  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
+  char *user_forbidden_mounts[user_forbidden_mounts_length];
+  unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
+  unsigned int last_el;
+
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts started", __FILE__, __LINE__);
+
+  if (read_fstab (user_forbidden_mounts, ptr_user_forbidden_mounts_length) != 0)
+    {
+      syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't continue", __FILE__, __LINE__);
+      return 1;
+    }
   
   if (user_forbidden_mounts_length > *ptr_length)
     {
@@ -83,11 +95,13 @@ read_forbidden_mounts (char **array,
                   __FILE__, __LINE__);
           return 1;
       }
+      free (user_forbidden_mounts[loop_i_mount]);
     }
   *ptr_length = user_forbidden_mounts_length;
+  last_el = user_forbidden_mounts_length - 1;
 
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully assigned all the values, "
-          "length = %u, array[%u] = %s", __FILE__, __LINE__, *ptr_length, 6, array[6]);
+          "length = %u, array[%u] = %s", __FILE__, __LINE__, *ptr_length, last_el, array[last_el]);
   return 0;
 }
 
@@ -97,13 +111,15 @@ read_forbidden_volumes (char **array,
 {
   char concat[255];
   unsigned int length;
+  unsigned int last_el;
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
   if (read_forbidden_mounts (array, ptr_length) == 0)
     {
       length = *ptr_length;
+      last_el = length - 1;
       syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully read %u forbidden mounts, "
-              "array[%u] = %s", __FILE__, __LINE__, length, 6, array[6]);
+              "array[%u] = %s", __FILE__, __LINE__, length, last_el, array[last_el]);
       for (unsigned int loop_i_volume = 0; loop_i_volume < length; loop_i_volume++)
         {
           // no checks for length because it's a stub
@@ -118,7 +134,7 @@ read_forbidden_volumes (char **array,
             }
         }
       syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, "
-              "length = %u, array[%u] = %s", __FILE__, __LINE__, length, 6, array[6]);
+              "length = %u, array[%u] = %s", __FILE__, __LINE__, length, last_el, array[last_el]);
       return 0;
     }
   else
