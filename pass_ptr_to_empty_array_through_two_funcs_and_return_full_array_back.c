@@ -95,7 +95,7 @@ read_forbidden_mounts (char **array,
           syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to allocate memory", 
                   __FILE__, __LINE__);
           return 1;
-      }
+        }
       free (user_forbidden_mounts[loop_i_mount]);
     }
   *ptr_length = user_forbidden_mounts_length;
