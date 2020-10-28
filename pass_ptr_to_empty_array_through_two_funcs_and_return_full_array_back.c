@@ -1,14 +1,44 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <mntent.h>
 #include <syslog.h>
 
 #define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
 
 static int
+read_fstab (void)
+{
+  char *read_file;
+  FILE *file;
+  
+  // in glib: read_file = get_fstab_file ();
+  read_file = "/etc/fstab";
+  
+  file = setmntent (read_file, "r");
+  if (file == NULL)
+    {
+      syslog (LOG_EMERG, "%s[%u]: read_fstab failed to read fstab file", __FILE__, __LINE__);
+      return 1;
+    }
+  else
+    {
+      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully read fstab file", __FILE__, __LINE__);
+      endmntent (file);
+      return 0;
+    }
+}
+
+static int
 read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
 {
+  if (read_fstab () != 0)
+  {
+    syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't continue", __FILE__, __LINE__);
+    return 1;
+  }
+  
   char *user_forbidden_mounts[] = { "/mnt/cdrom", "/mnt/cdaudio", "/tmp", "/var", 
           "/dev/shm", "/mnt/sambadir1", "/mnt/sambadir2" };
   unsigned int user_forbidden_mounts_length = sizeof (user_forbidden_mounts) 
