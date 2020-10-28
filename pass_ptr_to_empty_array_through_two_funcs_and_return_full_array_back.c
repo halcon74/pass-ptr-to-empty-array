@@ -69,7 +69,7 @@ read_forbidden_mounts (char **array,
   unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
   char *user_forbidden_mounts[user_forbidden_mounts_length];
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
-  unsigned int last_el;
+  unsigned int last_el;// used in syslog only
 
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts started", __FILE__, __LINE__);
 
@@ -111,7 +111,7 @@ read_forbidden_volumes (char **array,
 {
   char concat[255];
   unsigned int length;
-  unsigned int last_el;
+  unsigned int last_el;// used in syslog only
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
   if (read_forbidden_mounts (array, ptr_length) == 0)
