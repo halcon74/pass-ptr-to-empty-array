@@ -17,7 +17,8 @@ read_forbidden_mounts (char **array,
     return 1;
   
   for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; loop_i_mount++)
-    array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount]);
+    if ((array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount])) == NULL)
+      return 1;
   *ptr_length = user_forbidden_mounts_length;
   
   return 0;
@@ -39,7 +40,8 @@ read_forbidden_volumes (char **array,
           strcat (strcpy (concat, array[loop_i_volume]), " changed");
           // without this `free` there is a leak
           free (array[loop_i_volume]);
-          array[loop_i_volume] = strdup (concat);
+          if ((array[loop_i_volume] = strdup (concat)) == NULL)
+            return 1;
         }
       return 0;
     }
