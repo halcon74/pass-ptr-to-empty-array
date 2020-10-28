@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mntent.h>
 #include <syslog.h>
+#include <mntent.h>
 
 #define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
 
@@ -11,6 +11,13 @@ read_fstab (void)
 {
   char *read_file;
   FILE *file;
+  struct mntent ent;
+  char buf[1024];
+  struct mntent *mntent;
+  char *mount_path;
+  char *mount_opts;
+
+#ifndef HAVE_GETMNTENT_R
   
   // in glib: read_file = get_fstab_file ();
   read_file = "/etc/fstab";
@@ -22,11 +29,24 @@ read_fstab (void)
       return 1;
     }
   else
-    {
-      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully read %s", __FILE__, __LINE__, read_file);
+    {      
+      while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
+        {
+          mount_path = mntent->mnt_dir;
+          mount_opts = mntent->mnt_opts;
+          syslog (LOG_EMERG, "%s[%u]: read_fstab reads directory %s, options %s", __FILE__, __LINE__, mount_path, mount_opts);
+        }
+      
       endmntent (file);
+
+      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully read %s", __FILE__, __LINE__, read_file);
       return 0;
     }
+
+#else
+  syslog (LOG_EMERG, "%s[%u]: read_fstab can't find getmntent_r", __FILE__, __LINE__);
+  return 1;
+#endif
 }
 
 static int
