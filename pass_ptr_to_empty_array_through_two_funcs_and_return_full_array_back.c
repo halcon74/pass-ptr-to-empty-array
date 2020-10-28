@@ -74,7 +74,7 @@ update_mounts (void)
   if (read_forbidden_mounts (user_forbidden_mounts, ptr_user_forbidden_mounts_length) == 0)
     for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; 
             loop_i_mount++)
-    free (user_forbidden_mounts[loop_i_mount]);
+      free (user_forbidden_mounts[loop_i_mount]);
 }
 
 int
