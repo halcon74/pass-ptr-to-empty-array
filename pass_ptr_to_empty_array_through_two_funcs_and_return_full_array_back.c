@@ -52,7 +52,8 @@ read_fstab (char **array,
       endmntent (file);
       *ptr_length = sizeof (array) / sizeof (array[0]);
       
-      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", __FILE__, __LINE__, *ptr_length, read_file);
+      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", 
+              __FILE__, __LINE__, *ptr_length, read_file);
       return 0;
     }
 
