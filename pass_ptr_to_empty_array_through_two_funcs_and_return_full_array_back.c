@@ -18,12 +18,12 @@ read_fstab (void)
   file = setmntent (read_file, "r");
   if (file == NULL)
     {
-      syslog (LOG_EMERG, "%s[%u]: read_fstab failed to read fstab file", __FILE__, __LINE__);
+      syslog (LOG_EMERG, "%s[%u]: read_fstab failed to read %s", __FILE__, __LINE__, read_file);
       return 1;
     }
   else
     {
-      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully read fstab file", __FILE__, __LINE__);
+      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully read %s", __FILE__, __LINE__, read_file);
       endmntent (file);
       return 0;
     }
