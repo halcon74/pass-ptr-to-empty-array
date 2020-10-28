@@ -24,7 +24,14 @@ read_forbidden_mounts (char **array,
     }
   
   for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; loop_i_mount++)
-    array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount]);
+    {
+      if ((array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount])) == NULL)
+        {
+          syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to allocate memory", 
+                  __FILE__, __LINE__);
+          return 1;
+      }
+    }
   *ptr_length = user_forbidden_mounts_length;
 
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully assigned all the values, "
@@ -51,7 +58,12 @@ read_forbidden_volumes (char **array,
           strcat (strcpy (concat, array[loop_i_volume]), " changed");
           // without this `free` there is a leak
           free (array[loop_i_volume]);
-          array[loop_i_volume] = strdup (concat);
+          if ((array[loop_i_volume] = strdup (concat)) == NULL)
+            {
+              syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to allocate memory", 
+                      __FILE__, __LINE__);
+              return 1;
+            }
         }
       syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, "
               "length = %u, array[%u] = %s", __FILE__, __LINE__, length, 6, array[6]);
