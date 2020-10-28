@@ -32,9 +32,11 @@ read_fstab (void)
     {      
       while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
         {
-          mount_path = mntent->mnt_dir;
-          mount_opts = mntent->mnt_opts;
-          syslog (LOG_EMERG, "%s[%u]: read_fstab reads directory %s, options %s", __FILE__, __LINE__, mount_path, mount_opts);
+          if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
+            {
+              mount_path = mntent->mnt_dir;
+              syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", __FILE__, __LINE__, mount_path);
+            }
         }
       
       endmntent (file);
