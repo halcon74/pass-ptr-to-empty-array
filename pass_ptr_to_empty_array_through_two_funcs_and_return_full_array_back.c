@@ -67,8 +67,8 @@ static int
 read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
 {
-  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_mounts[user_forbidden_mounts_length];
+  char *user_forbidden_mounts[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_mounts_length = sizeof(user_forbidden_mounts) / sizeof(user_forbidden_mounts[0]);
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   unsigned int last_el;// used in syslog only
 
@@ -149,8 +149,8 @@ read_forbidden_volumes (char **array,
 static void
 update_volumes (void)
 {
-  unsigned int user_forbidden_volumes_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_volumes[user_forbidden_volumes_length];
+  char *user_forbidden_volumes[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_volumes_length = sizeof(user_forbidden_volumes) / sizeof(user_forbidden_volumes[0]);
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   printf ("update_volumes started\n");
   
@@ -175,8 +175,8 @@ update_volumes (void)
 static void
 update_mounts (void)
 {
-  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_mounts[user_forbidden_mounts_length];
+  char *user_forbidden_mounts[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_mounts_length = sizeof(user_forbidden_mounts) / sizeof(user_forbidden_mounts[0]);
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   printf ("update_mounts started\n");
   
