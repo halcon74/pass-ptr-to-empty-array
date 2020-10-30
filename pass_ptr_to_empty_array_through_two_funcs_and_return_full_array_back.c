@@ -40,6 +40,7 @@ read_fstab (char **array,
                 {
                   syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
                           __FILE__, __LINE__);
+                  endmntent (file);
                   return 1;
                 }
               syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
