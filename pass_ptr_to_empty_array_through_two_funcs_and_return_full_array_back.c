@@ -19,7 +19,7 @@ read_fstab (char **array,
   struct mntent *mntent;
   char *mount_path;
   unsigned int loop_i_mount = 0;
-  int memory_error_cought = -1;
+  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>0)
   
   *ptr_length = 0;
   read_file = "/etc/fstab";// in glib: read_file = get_fstab_file ();
@@ -40,7 +40,7 @@ read_fstab (char **array,
             {
               syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
                      __FILE__, __LINE__);
-              memory_error_cought = loop_i_mount;
+              failed_el_index = loop_i_mount;
               break;
             }
           syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
@@ -51,9 +51,9 @@ read_fstab (char **array,
 
   endmntent (file);
 
-  if (memory_error_cought != -1)
+  if (failed_el_index != -1)
     {
-      for (unsigned int loop_i_mount = 0; loop_i_mount <= memory_error_cought; loop_i_mount++)
+      for (unsigned int loop_i_mount = 0; loop_i_mount <= failed_el_index; loop_i_mount++)
         free (array[loop_i_mount]);
       *ptr_length = 0;
       return 1;
