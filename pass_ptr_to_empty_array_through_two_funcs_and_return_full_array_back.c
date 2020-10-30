@@ -53,8 +53,8 @@ read_fstab (char **array,
 
   if (failed_el_index != -1)
     {
-      for (unsigned int loop_i_mount = 0; loop_i_mount <= failed_el_index; loop_i_mount++)
-        free (array[loop_i_mount]);
+      for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
+        free (array[loop_j]);
       *ptr_length = 0;
       return 1;
     }
