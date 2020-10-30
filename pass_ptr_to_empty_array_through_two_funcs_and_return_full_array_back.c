@@ -10,14 +10,13 @@ static int
 read_fstab (char **array,
                          unsigned int *ptr_length)
 {
-  char *read_file;
+  const char *read_file;
   FILE *file;
   struct mntent ent;
   char buf[1024];
   struct mntent *mntent;
   char *mount_path;
   unsigned int loop_i_mount = 0;
-
 
   if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
   
@@ -57,7 +56,6 @@ read_fstab (char **array,
               __FILE__, __LINE__, *ptr_length, read_file);
       return 0;
     }
-
 
 }  else {// in glib: #else
   syslog (LOG_EMERG, "%s[%u]: read_fstab can't find getmntent_r", __FILE__, __LINE__);
