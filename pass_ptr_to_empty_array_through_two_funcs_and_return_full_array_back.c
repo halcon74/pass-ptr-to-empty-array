@@ -10,6 +10,8 @@ static int
 read_fstab (char **array,
                          unsigned int *ptr_length)
 {
+  if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
+  
   const char *read_file;
   FILE *file;
   struct mntent ent;
@@ -17,12 +19,9 @@ read_fstab (char **array,
   struct mntent *mntent;
   char *mount_path;
   unsigned int loop_i_mount = 0;
-
-  if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
   
   *ptr_length = 0;
-  // in glib: read_file = get_fstab_file ();
-  read_file = "/etc/fstab";
+  read_file = "/etc/fstab";// in glib: read_file = get_fstab_file ();
   
   file = setmntent (read_file, "r");
   if (file == NULL)
