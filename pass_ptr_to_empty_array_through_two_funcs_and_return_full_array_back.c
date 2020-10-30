@@ -29,34 +29,32 @@ read_fstab (char **array,
       syslog (LOG_EMERG, "%s[%u]: read_fstab failed to read %s", __FILE__, __LINE__, read_file);
       return 1;
     }
-  else
-    {      
-      while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
+   
+  while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
+    {
+      if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
         {
-          if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
+          mount_path = mntent->mnt_dir;
+          if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
             {
-              mount_path = mntent->mnt_dir;
-              if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
-                {
-                  syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
-                          __FILE__, __LINE__);
-                  endmntent (file);
-                  return 1;
-                }
-              syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
-	              __FILE__, __LINE__, mount_path);
-              loop_i_mount++;
+              syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
+                     __FILE__, __LINE__);
+              endmntent (file);
+              return 1;
             }
+          syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
+	         __FILE__, __LINE__, mount_path);
+          loop_i_mount++;
         }
-      
-      endmntent (file);
-      *ptr_length = loop_i_mount;
-      
-      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", 
-              __FILE__, __LINE__, *ptr_length, read_file);
-      return 0;
     }
-
+  
+  endmntent (file);
+  *ptr_length = loop_i_mount;
+  
+  syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", 
+         __FILE__, __LINE__, *ptr_length, read_file);
+  return 0;
+  
 }  else {// in glib: #else
   syslog (LOG_EMERG, "%s[%u]: read_fstab can't find getmntent_r", __FILE__, __LINE__);
   return 1;
