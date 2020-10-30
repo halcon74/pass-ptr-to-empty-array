@@ -48,18 +48,18 @@ read_fstab (char **array,
           loop_i_mount++;
         }
     }
-    
+
+  endmntent (file);
+
   if (memory_error_cought != -1)
     {
       for (unsigned int loop_i_mount = 0; loop_i_mount <= memory_error_cought; loop_i_mount++)
         free (array[loop_i_mount]);
-      endmntent (file);
+      *ptr_length = 0;
       return 1;
     }
   
-  endmntent (file);
   *ptr_length = loop_i_mount;
-  
   syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", 
          __FILE__, __LINE__, *ptr_length, read_file);
   return 0;
