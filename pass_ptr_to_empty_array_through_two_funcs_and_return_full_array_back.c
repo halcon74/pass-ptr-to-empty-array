@@ -10,7 +10,7 @@ static int
 read_fstab (char **array,
                          unsigned int *ptr_length)
 {
-  if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
+if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
   
   const char *read_file;
   FILE *file;
@@ -55,7 +55,6 @@ read_fstab (char **array,
     {
       for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
         free (array[loop_j]);
-      *ptr_length = 0;
       return 1;
     }
   
