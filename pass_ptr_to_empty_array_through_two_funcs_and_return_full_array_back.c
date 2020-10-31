@@ -20,8 +20,8 @@ if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
   char *mount_path;
   unsigned int loop_i_mount = 0;
   int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
-  
   unsigned max_ptr_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
+
   *ptr_length = 0;
   read_file = "/etc/fstab";// in glib: read_file = get_fstab_file ();
   
