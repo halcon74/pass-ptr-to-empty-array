@@ -27,7 +27,7 @@ if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
   file = setmntent (read_file, "r");
   if (file == NULL)
     {
-      syslog (LOG_EMERG, "%s[%u]: read_fstab failed to read %s", __FILE__, __LINE__, read_file);
+      syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to read %s", __FILE__, __LINE__, read_file);
       return 1;
     }
    
@@ -38,12 +38,12 @@ if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
           mount_path = mntent->mnt_dir;
           if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
             {
-              syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
+              syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to allocate memory", 
                      __FILE__, __LINE__);
               failed_el_index = loop_i_mount;
               break;
             }
-          syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
+          syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts found directory %s", 
 	         __FILE__, __LINE__, mount_path);
           loop_i_mount++;
         }
@@ -59,12 +59,12 @@ if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
     }
   
   *ptr_length = loop_i_mount;
-  syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", 
+  syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully found %u directories in %s", 
          __FILE__, __LINE__, *ptr_length, read_file);
   return 0;
   
 }  else {// in glib: #else
-  syslog (LOG_EMERG, "%s[%u]: read_fstab can't find getmntent_r", __FILE__, __LINE__);
+  syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't find getmntent_r", __FILE__, __LINE__);
   return 1;
 }// in glib: #endif
 }
