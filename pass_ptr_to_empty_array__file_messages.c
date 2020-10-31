@@ -7,103 +7,74 @@
 #define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
 
 static int
-read_fstab (char **array,
+read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
 {
-  char *read_file;
+if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
+  
+  const char *read_file;
   FILE *file;
   struct mntent ent;
   char buf[1024];
   struct mntent *mntent;
   char *mount_path;
   unsigned int loop_i_mount = 0;
+  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
+  unsigned max_ptr_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
 
-#ifndef HAVE_GETMNTENT_R
-  
   *ptr_length = 0;
-  // in glib: read_file = get_fstab_file ();
-  read_file = "/etc/fstab";
+  read_file = "/etc/fstab";// in glib: read_file = get_fstab_file ();
   
   file = setmntent (read_file, "r");
   if (file == NULL)
     {
-      syslog (LOG_EMERG, "%s[%u]: read_fstab failed to read %s", __FILE__, __LINE__, read_file);
+      syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to read %s", __FILE__, __LINE__, read_file);
       return 1;
     }
-  else
-    {      
-      while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
+   
+  while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
+    {
+      if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
         {
-          if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
+          mount_path = mntent->mnt_dir;
+          if (loop_i_mount == max_ptr_length)
             {
-              mount_path = mntent->mnt_dir;
-              if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
-                {
-                  syslog (LOG_EMERG, "%s[%u]: read_fstab failed to allocate memory", 
-                          __FILE__, __LINE__);
-                  return 1;
-                }
-              syslog (LOG_EMERG, "%s[%u]: read_fstab found directory %s", 
-	              __FILE__, __LINE__, mount_path);
-              loop_i_mount++;
+              syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts found more than %d (maximum allowed) entries in %s;"
+                     " all the entries starting with %s will NOT be used", 
+                     __FILE__, __LINE__, max_ptr_length, read_file, mount_path);
+              break;
             }
+          if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
+            {
+              syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to allocate memory", 
+                     __FILE__, __LINE__);
+              failed_el_index = loop_i_mount;
+              break;
+            }
+          syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts found directory %s", 
+	         __FILE__, __LINE__, mount_path);
+          loop_i_mount++;
         }
-      
-      endmntent (file);
-      *ptr_length = loop_i_mount;
-      
-      syslog (LOG_EMERG, "%s[%u]: read_fstab successfully found %u directories in %s", 
-              __FILE__, __LINE__, *ptr_length, read_file);
-      return 0;
     }
 
-#else
-  syslog (LOG_EMERG, "%s[%u]: read_fstab can't find getmntent_r", __FILE__, __LINE__);
-  return 1;
-#endif
-}
+  endmntent (file);
 
-static int
-read_forbidden_mounts (char **array,
-                         unsigned int *ptr_length)
-{
-  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_mounts[user_forbidden_mounts_length];
-  unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
-  unsigned int last_el;// used in syslog only
-
-  syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts started", __FILE__, __LINE__);
-
-  if (read_fstab (user_forbidden_mounts, ptr_user_forbidden_mounts_length) != 0)
+  if (failed_el_index != -1)
     {
-      syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't continue", __FILE__, __LINE__);
+      for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
+        free (array[loop_j]);
       return 1;
     }
   
-  if (user_forbidden_mounts_length > *ptr_length)
-    {
-      syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't assign values because "
-              "user_forbidden_mounts contains %d entries (more than %d entries are not allowed)", 
-              __FILE__, __LINE__, user_forbidden_mounts_length, *ptr_length);
-      return 1;
-    }
-  
-  for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; loop_i_mount++)
-    {
-      if ((array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount])) == NULL)
-        {
-          syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts failed to allocate memory", 
-                  __FILE__, __LINE__);
-          return 1;
-        }
-      free (user_forbidden_mounts[loop_i_mount]);
-    }
-  *ptr_length = user_forbidden_mounts_length;
-  last_el = user_forbidden_mounts_length - 1;
-
-  syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully assigned all the values, "
-          "length = %u, array[%u] = %s", __FILE__, __LINE__, *ptr_length, last_el, array[last_el]);
+  *ptr_length = loop_i_mount;
+  syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully found %u directories in %s", 
+         __FILE__, __LINE__, *ptr_length, read_file);
   return 0;
+  
+}  else {// in glib: #else
+  syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't find getmntent_r", __FILE__, __LINE__);
+  return 1;
+}// in glib: #endif
 }
 
 static int
@@ -112,6 +83,7 @@ read_forbidden_volumes (char **array,
 {
   char concat[255];
   unsigned int length;
+  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
   unsigned int last_el;// used in syslog only
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
@@ -131,9 +103,18 @@ read_forbidden_volumes (char **array,
             {
               syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to allocate memory", 
                       __FILE__, __LINE__);
-              return 1;
+              failed_el_index = loop_i_volume;
+              break;
             }
         }
+      
+      if (failed_el_index != -1)
+        {
+          for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
+            free (array[loop_j]);
+          return 1;
+        }
+      
       syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, "
               "length = %u, array[%u] = %s", __FILE__, __LINE__, length, last_el, array[last_el]);
       return 0;
@@ -149,8 +130,8 @@ read_forbidden_volumes (char **array,
 static void
 update_volumes (void)
 {
-  unsigned int user_forbidden_volumes_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_volumes[user_forbidden_volumes_length];
+  char *user_forbidden_volumes[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_volumes_length = sizeof(user_forbidden_volumes) / sizeof(user_forbidden_volumes[0]);
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   printf ("update_volumes started\n");
   
@@ -175,8 +156,8 @@ update_volumes (void)
 static void
 update_mounts (void)
 {
-  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_mounts[user_forbidden_mounts_length];
+  char *user_forbidden_mounts[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_mounts_length = sizeof(user_forbidden_mounts) / sizeof(user_forbidden_mounts[0]);
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   printf ("update_mounts started\n");
   

@@ -6,75 +6,59 @@
 #define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
 
 static int
-read_fstab (char **array,
+read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
 {
-  char *read_file;
+if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
+  
+  const char *read_file;
   FILE *file;
   struct mntent ent;
   char buf[1024];
   struct mntent *mntent;
   char *mount_path;
   unsigned int loop_i_mount = 0;
+  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
+  unsigned max_ptr_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
 
-#ifndef HAVE_GETMNTENT_R
-  
   *ptr_length = 0;
-  // in glib: read_file = get_fstab_file ();
-  read_file = "/etc/fstab";
+  read_file = "/etc/fstab";// in glib: read_file = get_fstab_file ();
   
   file = setmntent (read_file, "r");
   if (file == NULL)
+    return 1;
+   
+  while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
     {
+      if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
+        {
+          mount_path = mntent->mnt_dir;
+          if (loop_i_mount == max_ptr_length)
+            break;
+          if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
+            {
+              failed_el_index = loop_i_mount;
+              break;
+            }
+          loop_i_mount++;
+        }
+    }
+
+  endmntent (file);
+
+  if (failed_el_index != -1)
+    {
+      for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
+        free (array[loop_j]);
       return 1;
     }
-  else
-    {      
-      while ((mntent = getmntent_r (file, &ent, buf, sizeof (buf))) != NULL)
-        {
-          if (hasmntopt (mntent, "x-gvfs-hide") != NULL)
-            {
-              mount_path = mntent->mnt_dir;
-              if ((array[loop_i_mount] = strdup (mount_path)) == NULL)
-                return 1;
-              loop_i_mount++;
-            }
-        }
-      
-      endmntent (file);
-      *ptr_length = loop_i_mount;
-      
-      return 0;
-    }
-
-#else
-  return 1;
-#endif
-}
-
-static int
-read_forbidden_mounts (char **array,
-                         unsigned int *ptr_length)
-{
-  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_mounts[user_forbidden_mounts_length];
-  unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   
-  if (read_fstab (user_forbidden_mounts, ptr_user_forbidden_mounts_length) != 0)
-    return 1;
-  
-  if (user_forbidden_mounts_length > *ptr_length)
-    return 1;
-  
-  for (unsigned int loop_i_mount = 0; loop_i_mount < user_forbidden_mounts_length; loop_i_mount++)
-    {
-      if ((array[loop_i_mount] = strdup (user_forbidden_mounts[loop_i_mount])) == NULL)
-        return 1;
-      free (user_forbidden_mounts[loop_i_mount]);
-    }
-  *ptr_length = user_forbidden_mounts_length;
-  
+  *ptr_length = loop_i_mount;
   return 0;
+  
+}  else {// in glib: #else
+  return 1;
+}// in glib: #endif
 }
 
 static int
@@ -83,6 +67,7 @@ read_forbidden_volumes (char **array,
 {
   char concat[255];
   unsigned int length;
+  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
   
   if (read_forbidden_mounts (array, ptr_length) == 0)
     {
@@ -94,8 +79,19 @@ read_forbidden_volumes (char **array,
           // without this `free` there is a leak
           free (array[loop_i_volume]);
           if ((array[loop_i_volume] = strdup (concat)) == NULL)
-            return 1;
+            {
+              failed_el_index = loop_i_volume;
+              break;
+            }
         }
+      
+      if (failed_el_index != -1)
+        {
+          for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
+            free (array[loop_j]);
+          return 1;
+        }
+      
       return 0;
     }
   else
@@ -107,8 +103,8 @@ read_forbidden_volumes (char **array,
 static void
 update_volumes (void)
 {
-  unsigned int user_forbidden_volumes_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_volumes[user_forbidden_volumes_length];
+  char *user_forbidden_volumes[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_volumes_length = sizeof(user_forbidden_volumes) / sizeof(user_forbidden_volumes[0]);
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   
   if (read_forbidden_volumes (user_forbidden_volumes, ptr_user_forbidden_volumes_length) == 0)
@@ -122,8 +118,8 @@ update_volumes (void)
 static void
 update_mounts (void)
 {
-  unsigned int user_forbidden_mounts_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-  char *user_forbidden_mounts[user_forbidden_mounts_length];
+  char *user_forbidden_mounts[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
+  unsigned int user_forbidden_mounts_length = sizeof(user_forbidden_mounts) / sizeof(user_forbidden_mounts[0]);
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   
   if (read_forbidden_mounts (user_forbidden_mounts, ptr_user_forbidden_mounts_length) == 0)
