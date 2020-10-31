@@ -83,6 +83,7 @@ read_forbidden_volumes (char **array,
 {
   char concat[255];
   unsigned int length;
+  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
   unsigned int last_el;// used in syslog only
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
@@ -102,9 +103,18 @@ read_forbidden_volumes (char **array,
             {
               syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to allocate memory", 
                       __FILE__, __LINE__);
-              return 1;
+              failed_el_index = loop_i_volume;
+              break;
             }
         }
+      
+      if (failed_el_index != -1)
+        {
+          for (unsigned int loop_j = 0; loop_j <= failed_el_index; loop_j++)
+            free (array[loop_j]);
+          return 1;
+        }
+      
       syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes successfully assigned all the values, "
               "length = %u, array[%u] = %s", __FILE__, __LINE__, length, last_el, array[last_el]);
       return 0;
