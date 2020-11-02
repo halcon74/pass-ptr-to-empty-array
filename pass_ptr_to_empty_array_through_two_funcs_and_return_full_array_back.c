@@ -43,8 +43,9 @@ static int
 read_forbidden_volumes (char **array,
                          unsigned int *ptr_length) 
 {
-  char concat[255];
   unsigned int length;
+  char concat[255];
+  int snprintf_result;
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
   if (read_forbidden_mounts (array, ptr_length) == 0)
@@ -54,10 +55,14 @@ read_forbidden_volumes (char **array,
               "array[%u] = %s", __FILE__, __LINE__, length, 6, array[6]);
       for (unsigned int loop_i_volume = 0; loop_i_volume < length; loop_i_volume++)
         {
-          // no checks for length because it's a stub
-          strcat (strcpy (concat, array[loop_i_volume]), " changed");
-          // without this `free` there is a leak
-          free (array[loop_i_volume]);
+          snprintf_result = snprintf (concat, sizeof (concat), "%s%s", array[loop_i_volume], " changed");
+          if (snprintf_result >= sizeof (concat))
+            {
+              syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes truncated strings while concatenating; "
+                      "in principle, here must be realloc + another snprintf, but there aren't because it's just a stub",
+                      __FILE__, __LINE__);
+            }
+          free (array[loop_i_volume]);// without this `free` there is a leak
           if ((array[loop_i_volume] = strdup (concat)) == NULL)
             {
               syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to allocate memory", 
