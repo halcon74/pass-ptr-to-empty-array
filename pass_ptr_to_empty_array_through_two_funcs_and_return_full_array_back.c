@@ -19,8 +19,8 @@ read_forbidden_mounts (char **array,
   char *mount_path;
   unsigned int loop_i_mount = 0;
   int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
-  unsigned max_ptr_length = MAX_USER_FORBIDDEN_MOUNTS_LENGTH;
-
+  unsigned int max_ptr_length = *ptr_length;
+  
   *ptr_length = 0;
   read_file = "/etc/fstab";// in glib: read_file = get_fstab_file ();
   
@@ -134,7 +134,7 @@ static void
 update_volumes (void)
 {
   char *user_forbidden_volumes[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
-  unsigned int user_forbidden_volumes_length = sizeof(user_forbidden_volumes) / sizeof(user_forbidden_volumes[0]);
+  unsigned int user_forbidden_volumes_length = sizeof (user_forbidden_volumes) / sizeof (user_forbidden_volumes[0]);
   unsigned int *ptr_user_forbidden_volumes_length = &user_forbidden_volumes_length;
   printf ("update_volumes started\n");
   
@@ -160,7 +160,7 @@ static void
 update_mounts (void)
 {
   char *user_forbidden_mounts[MAX_USER_FORBIDDEN_MOUNTS_LENGTH];
-  unsigned int user_forbidden_mounts_length = sizeof(user_forbidden_mounts) / sizeof(user_forbidden_mounts[0]);
+  unsigned int user_forbidden_mounts_length = sizeof (user_forbidden_mounts) / sizeof (user_forbidden_mounts[0]);
   unsigned int *ptr_user_forbidden_mounts_length = &user_forbidden_mounts_length;
   printf ("update_mounts started\n");
   
