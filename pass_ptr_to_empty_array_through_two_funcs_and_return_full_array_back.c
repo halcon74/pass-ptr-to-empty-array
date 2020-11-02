@@ -3,6 +3,7 @@
 #include <string.h>
 #include <syslog.h>
 #include <mntent.h>
+#include <limits.h>
 
 #define MAX_USER_FORBIDDEN_MOUNTS_LENGTH 100
 
