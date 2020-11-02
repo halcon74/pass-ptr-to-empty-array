@@ -59,7 +59,7 @@ read_forbidden_mounts (char **array,
 
   endmntent (file);
 
-  if (failed_el_index != -1)
+  if (failed_el_index != UINT_MAX)
     {
       for (unsigned int loop_j = 0; loop_j < failed_el_index; loop_j++)
         free (array[loop_j]);
