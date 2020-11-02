@@ -99,7 +99,7 @@ read_forbidden_volumes (char **array,
           snprintf_result = snprintf (concat, sizeof (concat), "%s%s", array[loop_i_volume], " changed");
           if (snprintf_result >= sizeof (concat))
             {
-              syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes failed to concatenate strings; "
+              syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes truncated strings while concatenating; "
                       "in principle, here must be realloc + another snprintf, but there aren't because it's just a stub",
                       __FILE__, __LINE__);
             }
