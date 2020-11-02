@@ -18,7 +18,7 @@ read_forbidden_mounts (char **array,
   struct mntent *mntent;
   char *mount_path;
   unsigned int loop_i_mount = 0;
-  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
+  unsigned int failed_el_index = UINT_MAX;// if an element fails to allocate memory, this variable will contain its index (>=0)
   unsigned int max_ptr_length = *ptr_length;
   
   *ptr_length = 0;
@@ -82,7 +82,7 @@ read_forbidden_volumes (char **array,
   unsigned int length;
   char concat[255];
   int snprintf_result;
-  int failed_el_index = -1;// if an element fails to allocate memory, this variable will contain its index (>=0)
+  unsigned int failed_el_index = UINT_MAX;// if an element fails to allocate memory, this variable will contain its index (>=0)
   unsigned int last_el;// used in syslog only
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_volumes started", __FILE__, __LINE__);
   
