@@ -10,8 +10,7 @@ static int
 read_forbidden_mounts (char **array,
                          unsigned int *ptr_length)
 {
-if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
-  
+#if 1// in glib: #ifdef HAVE_GETMNTENT_R
   const char *read_file;
   FILE *file;
   struct mntent ent;
@@ -70,11 +69,10 @@ if (1 == 1) {// in glib: #ifdef HAVE_GETMNTENT_R
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts successfully found %u directories in %s", 
          __FILE__, __LINE__, *ptr_length, read_file);
   return 0;
-  
-}  else {// in glib: #else
+#else
   syslog (LOG_EMERG, "%s[%u]: read_forbidden_mounts can't find getmntent_r", __FILE__, __LINE__);
   return 1;
-}// in glib: #endif
+#endif
 }
 
 static int
